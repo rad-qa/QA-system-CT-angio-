@@ -884,7 +884,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);bo
 //  Google Sheets API Layer  (混合模式：線上→GS，離線→localStorage)
 // ══════════════════════════════════════════════════════════════════
 const LS_GS_URL = 'qa-gs-url';
-let GS_URL = localStorage.getItem(LS_GS_URL) || '';
+let GS_URL = localStorage.getItem(LS_GS_URL) || 'https://script.google.com/macros/s/AKfycbyEpUq53E_Xin1vja0XLRrCk6UNuVoLREJQC6x4Gcm4fiekYXeEekT7r2i5o06B3DVIfQ/exec';
 let gsOnline = false;
 
 function updateGSStatus(state, msg) {
