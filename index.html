@@ -2535,11 +2535,17 @@ async function syncUsersToGS() {
 async function syncCTNotifyToGS() {
   if (!gsOnline) { showToast('尚未連線 Google Sheets','terr'); return; }
   showToast('同步通知設定中…','tok');
-  // 合併 email（存在 sharedCfg.users）和通知偏好
+  // 所有使用者的 email + 通知偏好一起同步
   const dataWithEmail = {};
-  Object.keys(ctCfg.notifyPrefs).forEach(uid => {
-    const u = sharedCfg.users.find(x => x.id === uid);
-    dataWithEmail[uid] = {...ctCfg.notifyPrefs[uid], email: u?.email || ''};
+  sharedCfg.users.forEach(u => {
+    const p = ctCfg.notifyPrefs[u.id] || {};
+    dataWithEmail[u.id] = {
+      email: u.email || '',
+      dailyDone: !!p.dailyDone,
+      monthlyDone: !!p.monthlyDone,
+      fail: !!p.fail,
+      reviewDone: !!p.reviewDone
+    };
   });
   const r = await gsPost('saveCTNotify', dataWithEmail);
   if (r && r.ok) showToast('✓ CT 通知設定已同步至 Google Sheets','tok');
@@ -2549,11 +2555,16 @@ async function syncCTNotifyToGS() {
 async function syncAngNotifyToGS() {
   if (!gsOnline) { showToast('尚未連線 Google Sheets','terr'); return; }
   showToast('同步通知設定中…','tok');
-  // 合併 email（存在 sharedCfg.users）和通知偏好
+  // 所有使用者的 email + 通知偏好一起同步
   const dataWithEmail = {};
-  Object.keys(angCfg.notifyPrefs).forEach(uid => {
-    const u = sharedCfg.users.find(x => x.id === uid);
-    dataWithEmail[uid] = {...angCfg.notifyPrefs[uid], email: u?.email || ''};
+  sharedCfg.users.forEach(u => {
+    const p = angCfg.notifyPrefs[u.id] || {};
+    dataWithEmail[u.id] = {
+      email: u.email || '',
+      dailyDone: !!p.dailyDone,
+      fail: !!p.fail,
+      reviewDone: !!p.reviewDone
+    };
   });
   const r = await gsPost('saveAngNotify', dataWithEmail);
   if (r && r.ok) showToast('✓ 血管攝影通知設定已同步至 Google Sheets','tok');
