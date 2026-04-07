@@ -1664,15 +1664,28 @@ function viewReviewOpinion(mo,rid,sys){
   document.getElementById('rec-detail-modal').classList.add('open');
 }
 
-function exportExcel(){
-  if(!filteredRecords.length){showToast('無資料可匯出','terr');return;}
+async function exportExcel(){
+  showToast('準備匯出，載入完整資料中…','tok');
+  await loadFullRecordsIfNeeded();
+  // 重新套用目前篩選條件，取得完整篩選結果
+  const type=document.getElementById('h-type')?.value||'';
+  const mo=document.getElementById('h-month')?.value||'';
+  const room=document.getElementById('h-room')?.value||'';
+  const exportRecs = records.filter(r=>{
+    if(r.type==='month-review') return true; // 覆核紀錄另外處理
+    if(type && r.type!==type) return false;
+    if(mo && !r.date?.startsWith(mo)) return false;
+    if(room && r.room!==room) return false;
+    return true;
+  });
+  if(!exportRecs.length){showToast('無資料可匯出','terr');return;}
   const wb=XLSX.utils.book_new();
 
   // ── 工作表1：每日品保 ──
   const dailyData=[['日期','檢查室','品保人員',
     '雷射定位燈','影像指示燈','揚聲器','攝影機','制動裝置','殘影',
     '水CT值(HU)','判定結果','儲存時間','備註']];
-  filteredRecords.filter(r=>r.type==='daily').forEach(r=>{
+  exportRecs.filter(r=>r.type==='daily').forEach(r=>{
     const c=r.checks||{};
     dailyData.push([
       r.date||'', RN[r.room]||r.room||'', r.staff||'',
@@ -1692,7 +1705,7 @@ function exportExcel(){
     '顯示器1','顯示器2','顯示器3','顯示器4','顯示器5','顯示器6',
     '中央ROI(HU)','三點鐘(HU)','六點鐘(HU)','九點鐘(HU)','十二點鐘(HU)',
     '雜訊基準值(HU)','測得雜訊(HU)','判定結果','儲存時間','備註']];
-  filteredRecords.filter(r=>r.type==='monthly').forEach(r=>{
+  exportRecs.filter(r=>r.type==='monthly').forEach(r=>{
     const d=r.dispItems||[];
     monthlyData.push([
       r.date||'', RN[r.room]||r.room||'', r.staff||'',
@@ -1711,7 +1724,7 @@ function exportExcel(){
 
   // ── 工作表3：月彙整覆核 ──
   const reviewData=[['月份','檢查室','覆核人員','覆核時間','覆核意見']];
-  filteredRecords.filter(r=>r.type==='month-review').forEach(r=>{
+  exportRecs.filter(r=>r.type==='month-review').forEach(r=>{
     reviewData.push([r.month||'', RN[r.room]||r.room||'', r.reviewer||'', r.reviewTime||'', r.opinion||'']);
   });
   if(reviewData.length>1){
