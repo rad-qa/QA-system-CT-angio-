@@ -1214,6 +1214,8 @@ function canReview(u){return u.role==='admin'||u.canReview===true;}
 function doLogin(){
   const id=document.getElementById('login-id').value.trim();
   const pw=document.getElementById('login-pw').value;
+  console.log('[Login] 輸入帳號:', id, '輸入密碼:', pw);
+  console.log('[Login] 目前使用者清單:', JSON.stringify(sharedCfg.users.map(u=>({id:u.id, pw:u.pw, pwType:typeof u.pw}))));
   const u=sharedCfg.users.find(x=>String(x.id)===id&&String(x.pw)===pw);
   if(!u){document.getElementById('login-err').style.display='block';return;}
   currentUser=u;
@@ -1631,10 +1633,62 @@ function viewReviewOpinion(mo,rid,sys){
 
 function exportExcel(){
   if(!filteredRecords.length){showToast('無資料可匯出','terr');return;}
-  const ws_data=[['日期','類型','檢查室','品保人員','水CT值(HU)','判定結果','儲存時間','備註']];
-  filteredRecords.filter(r=>r.type!=='month-review').forEach(r=>ws_data.push([r.date||'',r.type==='daily'?'每日品保':'每月品保',RN[r.room]||r.room,r.staff||'',r.ctVal!=null?r.ctVal.toFixed(2):'',r.overall==='pass'?'合格':'不合格',r.savedAt||'',r.note||'']));
-  const ws=XLSX.utils.aoa_to_sheet(ws_data);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'CT品保紀錄');
-  XLSX.writeFile(wb,`CT品保紀錄_${new Date().toISOString().slice(0,10)}.xlsx`);showToast('Excel已匯出');
+  const wb=XLSX.utils.book_new();
+
+  // ── 工作表1：每日品保 ──
+  const dailyData=[['日期','檢查室','品保人員',
+    '雷射定位燈','影像指示燈','揚聲器','攝影機','制動裝置','殘影',
+    '水CT值(HU)','判定結果','儲存時間','備註']];
+  filteredRecords.filter(r=>r.type==='daily').forEach(r=>{
+    const c=r.checks||{};
+    dailyData.push([
+      r.date||'', RN[r.room]||r.room||'', r.staff||'',
+      c.laser||'', c.ind||'', c.spk||'', c.cam||'', c.lock||'', c.ghost||'',
+      r.ctVal!=null?r.ctVal.toFixed(2):'',
+      r.overall==='pass'?'合格':'不合格',
+      r.savedAt||'', r.note||''
+    ]);
+  });
+  if(dailyData.length>1){
+    const ws1=XLSX.utils.aoa_to_sheet(dailyData);
+    XLSX.utils.book_append_sheet(wb,ws1,'每日品保');
+  }
+
+  // ── 工作表2：每月品保 ──
+  const monthlyData=[['日期','檢查室','品保人員',
+    '顯示器1','顯示器2','顯示器3','顯示器4','顯示器5','顯示器6',
+    '中央ROI(HU)','三點鐘(HU)','六點鐘(HU)','九點鐘(HU)','十二點鐘(HU)',
+    '雜訊基準值(HU)','測得雜訊(HU)','判定結果','儲存時間','備註']];
+  filteredRecords.filter(r=>r.type==='monthly').forEach(r=>{
+    const d=r.dispItems||[];
+    monthlyData.push([
+      r.date||'', RN[r.room]||r.room||'', r.staff||'',
+      d[0]||'', d[1]||'', d[2]||'', d[3]||'', d[4]||'', d[5]||'',
+      r.roiC!=null?r.roiC:'', r.roi3!=null?r.roi3:'',
+      r.roi6!=null?r.roi6:'', r.roi9!=null?r.roi9:'', r.roi12!=null?r.roi12:'',
+      r.noiseBase!=null?r.noiseBase:'', r.noiseCur!=null?r.noiseCur:'',
+      r.overall==='pass'?'合格':'不合格',
+      r.savedAt||'', r.note||''
+    ]);
+  });
+  if(monthlyData.length>1){
+    const ws2=XLSX.utils.aoa_to_sheet(monthlyData);
+    XLSX.utils.book_append_sheet(wb,ws2,'每月品保');
+  }
+
+  // ── 工作表3：月彙整覆核 ──
+  const reviewData=[['月份','檢查室','覆核人員','覆核時間','覆核意見']];
+  filteredRecords.filter(r=>r.type==='month-review').forEach(r=>{
+    reviewData.push([r.month||'', RN[r.room]||r.room||'', r.reviewer||'', r.reviewTime||'', r.opinion||'']);
+  });
+  if(reviewData.length>1){
+    const ws3=XLSX.utils.aoa_to_sheet(reviewData);
+    XLSX.utils.book_append_sheet(wb,ws3,'月彙整覆核');
+  }
+
+  if(wb.SheetNames.length===0){showToast('無資料可匯出','terr');return;}
+  XLSX.writeFile(wb,`CT品保紀錄_${new Date().toISOString().slice(0,10)}.xlsx`);
+  showToast('Excel已匯出（共'+wb.SheetNames.length+'個工作表）');
 }
 
 // CT Trend
