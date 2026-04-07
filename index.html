@@ -252,10 +252,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);bo
 @page trend-page{size:A4 landscape;margin:1cm}
 @media print{
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  #login-screen,#sys-screen,.sidebar,.btn-row,.btn,.toast,.modal-bg,.app-topbar,.ph,nav{display:none!important}
-  html,body,.app,.main{display:block!important;width:100%!important;padding:0!important;margin:0!important;background:#fff!important}
-  .page{display:none!important}
-  #print-area{display:block!important}
+  #login-screen,#sys-screen,.sidebar,.btn-row,.btn,.toast,.modal-bg,.app-topbar,.ph,nav,
+  .app,.main,.page,.hamburger,.sidebar-overlay,.gs-cfg-modal,.sync-indicator{display:none!important}
+  html,body{margin:0!important;padding:0!important;background:#fff!important}
+  #print-area{display:block!important;position:absolute!important;top:0!important;left:0!important;width:100%!important;margin:0!important;padding:0!important;}
   #trend-print-wrap{page:trend-page}
   .print-wrap{font-family:system-ui,sans-serif;font-size:10px;color:#000}
   .print-h1{text-align:center;font-size:15px;font-weight:bold;margin-bottom:8px}
@@ -1780,7 +1780,7 @@ function printTrend(){
   <div class="print-meta"><div>新北市立土城醫院影像診療科</div><div>列印：${nowStamp()}</div><div>檢查室：${RN[room]||room}</div><div>期間：${period}</div></div>
   <img src="${tImg}" style="width:100%;max-height:200px;object-fit:contain;border:1px solid #ddd;margin-bottom:10px">
   <img src="${mImg}" style="width:100%;max-height:130px;object-fit:contain;border:1px solid #ddd"></div>`;
-  window.print();
+  printNow();
 }
 
 // CT Settings
@@ -1840,7 +1840,7 @@ function printDaily(){
   ${noteItems.length?`<div class="print-notes"><h4>備註</h4>${noteItems.map(n=>`<div class="print-note-item">${mo}-${String(n.d).padStart(2,'0')}：${n.note}</div>`).join('')}</div>`:''}
   ${mr?`<div class="print-review-opinion"><h4>覆核意見　${mr.reviewer}　${mr.reviewTime}</h4><div>${mr.opinion}</div></div>`:''}
   </div>`;
-  window.print();
+  printNow();
 }
 
 function printMonthly(){
@@ -1930,7 +1930,7 @@ function printMonthly(){
   ${note?`<div class="print-notes"><h4>備註</h4><div>${note}</div></div>`:''}
   ${mr?`<div class="print-review-opinion"><h4>覆核意見　${mr.reviewer}　${mr.reviewTime}</h4><div>${mr.opinion}</div></div>`:''}
   </div>`;
-  window.print();
+  printNow();
 }
 
 // ══════════════
@@ -2120,7 +2120,7 @@ function printAngTrend(){
   <div style="font-size:9px;margin-bottom:5px">執行：${document.getElementById('ang-t-days').textContent}天｜合格：${document.getElementById('ang-t-pass').textContent}｜不合格：${document.getElementById('ang-t-fail').textContent}｜合格率：${document.getElementById('ang-t-rate').textContent}</div>
   <img src="${img1}" style="width:100%;max-height:160px;object-fit:contain;border:1px solid #ddd;margin-bottom:8px">
   <img src="${img2}" style="width:100%;max-height:200px;object-fit:contain;border:1px solid #ddd"></div>`;
-  window.print();
+  printNow();
 }
 
 // Ang History
@@ -2224,7 +2224,8 @@ function printAngDaily(){
   <table class="ptbl"><thead><tr><th>日期</th>${itemHeaders}<th>品保人員</th><th>判定</th></tr></thead><tbody>${rows}</tbody></table>
   ${noteItems.length?`<div class="print-notes"><h4>備註</h4>${noteItems.map(n=>`<div class="print-note-item">${mo}-${String(n.d).padStart(2,'0')}：${n.note}</div>`).join('')}</div>`:''}
   ${mr?`<div class="print-review-opinion"><h4>月彙整覆核意見　${mr.reviewer}　${mr.reviewTime}</h4><div>${mr.opinion}</div></div>`:''}
-  </div>`;window.print();
+  </div>`;
+  printNow();
 }
 
 // Ang Settings
@@ -2445,7 +2446,7 @@ function doPrintCTDaily(){
   });
 
   document.getElementById('print-area').innerHTML=allHtml;
-  window.print();
+  printNow();
 }
 
 // ── 查詢每月品保可列印紀錄 ──
@@ -2563,7 +2564,7 @@ function doPrintCTMonthly(){
   }
 
   document.getElementById('print-area').innerHTML=selected.map((r,i)=>buildMonthlyPage(r,i===0)).join('');
-  window.print();
+  printNow();
 }
 
 // ══════════════════════════════════════════
@@ -2644,7 +2645,7 @@ function doPrintAngDaily(){
   });
 
   document.getElementById('print-area').innerHTML=allHtml;
-  window.print();
+  printNow();
 }
 
 
@@ -2696,6 +2697,13 @@ async function syncAngNotifyToGS() {
   const r = await gsPost('saveAngNotify', dataWithEmail);
   if (r && r.ok) showToast('✓ 血管攝影通知設定已同步至 Google Sheets','tok');
   else showToast('同步失敗，請檢查連線','terr');
+}
+
+// ── 列印輔助函式 ──
+function printNow() {
+  // 確保列印時不會有空白頁
+  window.scrollTo(0, 0);
+  setTimeout(() => window.print(), 100);
 }
 
 // ── 啟動時非同步載入（GS優先）──
