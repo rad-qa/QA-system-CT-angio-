@@ -294,7 +294,16 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);bo
 .sync-indicator.show{display:flex}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .spin{animation:spin .8s linear infinite}
+.m-only-checks{display:none}
+.m-check-item{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid #eef1f6;gap:10px;flex-wrap:wrap}
+.m-check-item:last-child{border-bottom:none}
+.m-check-label{font-size:13px;font-weight:500;color:#2c3e50;flex:1;min-width:140px}
+.m-check-item .pf-wrap{flex-shrink:0}
+.m-check-item .ct-inp{width:140px;flex-shrink:0}
+.m-check-item .pf-wrap label{padding:6px 14px;font-size:13px}
 @media(max-width:800px){
+  .d-only-table{display:none!important}
+  .m-only-checks{display:block;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#fff}
   .sidebar{position:fixed;top:0;left:-210px;height:100vh;z-index:399;transition:left .25s;box-shadow:4px 0 20px rgba(0,0,0,.18)}
   .sidebar.open{left:0}
   .hamburger{display:flex}
@@ -410,7 +419,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);bo
   <div class="card">
     <div class="card-hd"><div class="dot dot-b"></div><h3>功能檢查項目</h3></div>
     <div class="ib ib-blue"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>每項須選擇合格(P)或不合格(F)；水CT值需介於 −7~+7 HU；任一項F即整體不合格</div>
-    <div style="overflow-x:auto"><table class="ctbl">
+    <div style="overflow-x:auto"><!-- 桌面版表格 -->
+    <table class="ctbl d-only-table">
       <thead><tr><th>雷射</th><th>指示燈與電腦</th><th>揚聲器</th><th>攝影機與監視器</th><th>安全連鎖</th><th>水CT值(HU)<br><span style="font-weight:400;font-size:10px">範圍：−7~+7</span></th><th>無假影</th><th>判定結果</th></tr></thead>
       <tbody><tr>
         <td><div class="pf-wrap"><input type="radio" name="dl" id="dlp" value="P" onchange="evalDaily()"><label for="dlp">P</label><input type="radio" name="dl" id="dlf" value="F" onchange="evalDaily()"><label for="dlf">F</label></div></td>
@@ -422,7 +432,17 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);bo
         <td><div class="pf-wrap"><input type="radio" name="dg" id="dgp" value="P" onchange="evalDaily()"><label for="dgp">P</label><input type="radio" name="dg" id="dgf" value="F" onchange="evalDaily()"><label for="dgf">F</label></div></td>
         <td id="d-res-cell"><span class="badge bn">待判定</span></td>
       </tr></tbody>
-    </table></div>
+    </table>
+    <!-- 手機版垂直列表 -->
+    <div class="m-only-checks">
+      <div class="m-check-item"><span class="m-check-label">① 雷射定位燈</span><div class="pf-wrap"><input type="radio" name="dl" id="dlp-m" value="P" onchange="evalDaily()"><label for="dlp-m">P 合格</label><input type="radio" name="dl" id="dlf-m" value="F" onchange="evalDaily()"><label for="dlf-m">F 不合格</label></div></div>
+      <div class="m-check-item"><span class="m-check-label">② 指示燈與電腦</span><div class="pf-wrap"><input type="radio" name="di" id="dip-m" value="P" onchange="evalDaily()"><label for="dip-m">P 合格</label><input type="radio" name="di" id="dif-m" value="F" onchange="evalDaily()"><label for="dif-m">F 不合格</label></div></div>
+      <div class="m-check-item"><span class="m-check-label">③ 揚聲器</span><div class="pf-wrap"><input type="radio" name="ds" id="dsp-m" value="P" onchange="evalDaily()"><label for="dsp-m">P 合格</label><input type="radio" name="ds" id="dsf-m" value="F" onchange="evalDaily()"><label for="dsf-m">F 不合格</label></div></div>
+      <div class="m-check-item"><span class="m-check-label">④ 攝影機與監視器</span><div class="pf-wrap"><input type="radio" name="dc" id="dcp-m" value="P" onchange="evalDaily()"><label for="dcp-m">P 合格</label><input type="radio" name="dc" id="dcf-m" value="F" onchange="evalDaily()"><label for="dcf-m">F 不合格</label></div></div>
+      <div class="m-check-item"><span class="m-check-label">⑤ 安全連鎖</span><div class="pf-wrap"><input type="radio" name="dk" id="dkp-m" value="P" onchange="evalDaily()"><label for="dkp-m">P 合格</label><input type="radio" name="dk" id="dkf-m" value="F" onchange="evalDaily()"><label for="dkf-m">F 不合格</label></div></div>
+      <div class="m-check-item"><span class="m-check-label">⑥ 水CT值 (HU)　範圍：−7~+7</span><input type="number" class="ct-inp" id="d-ct-m" step="0.01" placeholder="輸入數值" oninput="syncCtVal(this);evalDaily()"></div>
+      <div class="m-check-item"><span class="m-check-label">⑦ 無假影</span><div class="pf-wrap"><input type="radio" name="dg" id="dgp-m" value="P" onchange="evalDaily()"><label for="dgp-m">P 合格</label><input type="radio" name="dg" id="dgf-m" value="F" onchange="evalDaily()"><label for="dgf-m">F 不合格</label></div></div>
+    </div></div>
     <div id="d-rbar" class="rbar pend" style="margin-top:10px">
       <div><div class="rl">判定結果</div><div class="rv" id="d-rbar-txt">請完成所有項目評估</div></div>
       <span id="d-rbar-badge" class="badge bn" style="margin-left:auto">待判定</span>
@@ -1041,6 +1061,15 @@ function setLoginBtnState(enabled) {
   }
 }
 
+function syncCtVal(src) {
+  // 同步手機版和桌面版的水CT值輸入框
+  const deskEl = document.getElementById('d-ct');
+  const mobEl = document.getElementById('d-ct-m');
+  if (!deskEl || !mobEl) return;
+  if (src.id === 'd-ct-m') deskEl.value = src.value;
+  else mobEl.value = src.value;
+}
+
 function toggleSidebar(sys) {
   const sb = document.getElementById(sys+'-sidebar');
   const ov = document.getElementById(sys+'-overlay');
@@ -1385,7 +1414,7 @@ function onRoomChange(p){
 function resetCTForm(p){
   if(p==='d'){
     ['dl','di','ds','dc','dk','dg'].forEach(n=>document.querySelectorAll(`input[name="${n}"]`).forEach(r=>r.checked=false));
-    document.getElementById('d-ct').value='';document.getElementById('d-ct').className='ct-inp';
+    document.getElementById('d-ct').value='';document.getElementById('d-ct').className='ct-inp';if(document.getElementById('d-ct-m'))document.getElementById('d-ct-m').value='';
     document.getElementById('d-note').value='';document.getElementById('d-confirm-chk').checked=false;
     document.getElementById('d-confirm-box').classList.remove('confirmed');document.getElementById('d-confirm-stamp').classList.remove('show');
     document.getElementById('d-rbar').className='rbar pend';document.getElementById('d-rbar-txt').textContent='請完成所有項目評估';
@@ -1413,7 +1442,10 @@ function onConfirm(p){
 function evalDaily(){
   const names=['dl','di','ds','dc','dk','dg'];
   const vals=names.map(n=>{const c=document.querySelector(`input[name="${n}"]:checked`);return c?c.value:null});
-  const ct=parseFloat(document.getElementById('d-ct').value);
+  // 同步手機版CT值到桌面版
+const mobCt = document.getElementById('d-ct-m');
+if(mobCt && mobCt.value && !document.getElementById('d-ct').value) document.getElementById('d-ct').value = mobCt.value;
+const ct=parseFloat(document.getElementById('d-ct').value);
   const ctFilled=!isNaN(ct),ctOk=ctFilled&&ct>=-7&&ct<=7;
   document.getElementById('d-ct').className='ct-inp'+(ctFilled?(ctOk?' ok':' err'):'');
   const allAnswered=vals.every(v=>v!==null)&&ctFilled,anyFail=vals.some(v=>v==='F')||!ctOk;
