@@ -1091,6 +1091,18 @@ document.addEventListener('click', function(e) {
 //  非同步載入狀態（GS優先，回退localStorage）
 // ═══════════════════════════════════════════
 let gsFullRecordsLoaded = false; // 是否已載入完整歷史紀錄
+let deletedKeys = new Set(JSON.parse(localStorage.getItem('qa-deleted-keys')||'[]')); // 已刪除紀錄的key集合
+
+function addDeletedKey(key) {
+  deletedKeys.add(key);
+  localStorage.setItem('qa-deleted-keys', JSON.stringify([...deletedKeys]));
+}
+function recKey(r) {
+  return r.savedAt + '|' + (r.date||'') + '|' + (r.room||'') + '|' + r.type;
+}
+function recKeyAng(r) {
+  return r.savedAt + '|' + (r.date||'') + '|' + r.type;
+}
 
 function getRecentFrom() {
   // 取得3個月前的日期
@@ -1614,6 +1626,8 @@ function deleteCTRecord(savedAt,date,room,type){
   if(!confirm(`確定要刪除此筆紀錄？\n日期：${date}　類型：${type==='daily'?'每日':'每月'}　操作無法復原。`))return;
   const idx=records.findIndex(r=>r.savedAt===savedAt&&r.date===date&&r.room===room&&r.type===type);
   if(idx<0){showToast('找不到該紀錄','terr');return;}
+  const rec=records[idx];
+  addDeletedKey(recKey(rec)); // 記錄已刪除的key
   records.splice(idx,1);
   saveStateGS_deleteCTRec({savedAt,date,room,type});updateCTReviewBadge();
   filteredRecords=filteredRecords.filter((_,i)=>i!==filteredRecords.findIndex(r=>r.savedAt===savedAt&&r.date===date&&r.room===room&&r.type===type));
@@ -2210,8 +2224,11 @@ function deleteAngRecord(savedAt,date){
   if(!confirm(`確定要刪除此筆紀錄？\n日期：${date}　操作無法復原。`))return;
   const idx=angRecords.findIndex(r=>r.savedAt===savedAt&&r.date===date&&r.type==='ang-daily');
   if(idx<0){showToast('找不到該紀錄','terr');return;}
+  const rec=angRecords[idx];
+  addDeletedKey(recKeyAng(rec)); // 記錄已刪除的key
   angRecords.splice(idx,1);
-  saveState();updateAngReviewBadge();
+  saveStateGS_deleteAngRec({savedAt:rec.savedAt, date:rec.date, type:rec.type});
+  updateAngReviewBadge();
   filterAngHistory();
   renderAngMonthReviewList();
   showToast('紀錄已刪除');
@@ -2815,22 +2832,22 @@ function stopAutoSync() {
   if (autoSyncTimer) { clearInterval(autoSyncTimer); autoSyncTimer = null; }
 }
 
-// 合併CT紀錄（GS為主，保留本地尚未同步的紀錄）
+// 合併CT紀錄（GS為主，排除已刪除，保留本地尚未同步的紀錄）
 function mergeRecords(local, gsRecs) {
-  // 以 savedAt+date+room+type 為唯一鍵
   const gsMap = new Map();
-  gsRecs.forEach(r => gsMap.set(r.savedAt+'|'+r.date+'|'+r.room+'|'+r.type, r));
-  // 本地有但GS沒有的（可能是剛寫入還沒同步）→ 保留
-  const localOnly = local.filter(r => !gsMap.has(r.savedAt+'|'+r.date+'|'+r.room+'|'+r.type));
-  return [...gsRecs, ...localOnly];
+  // 排除已在本地刪除的紀錄
+  gsRecs.filter(r => !deletedKeys.has(recKey(r))).forEach(r => gsMap.set(recKey(r), r));
+  // 本地有但GS沒有的（剛寫入還沒同步）→ 保留（也要排除已刪除的）
+  const localOnly = local.filter(r => !gsMap.has(recKey(r)) && !deletedKeys.has(recKey(r)));
+  return [...gsMap.values(), ...localOnly];
 }
 
-// 合併ANG紀錄
+// 合併ANG紀錄（GS為主，排除已刪除，保留本地尚未同步的紀錄）
 function mergeAngRecords(local, gsRecs) {
   const gsMap = new Map();
-  gsRecs.forEach(r => gsMap.set(r.savedAt+'|'+r.date+'|'+r.type, r));
-  const localOnly = local.filter(r => !gsMap.has(r.savedAt+'|'+r.date+'|'+r.type));
-  return [...gsRecs, ...localOnly];
+  gsRecs.filter(r => !deletedKeys.has(recKeyAng(r))).forEach(r => gsMap.set(recKeyAng(r), r));
+  const localOnly = local.filter(r => !gsMap.has(recKeyAng(r)) && !deletedKeys.has(recKeyAng(r)));
+  return [...gsMap.values(), ...localOnly];
 }
 
 // 手動完整同步（歷史查詢用）
@@ -2842,8 +2859,8 @@ async function manualSyncRecords() {
       gsGet('getCTRecords'),
       gsGet('getAngRecords')
     ]);
-    if (ctRecs && Array.isArray(ctRecs)) records = ctRecs;
-    if (angRecs && Array.isArray(angRecs)) angRecords = angRecs;
+    if (ctRecs && Array.isArray(ctRecs)) records = ctRecs.filter(r => !deletedKeys.has(recKey(r)));
+    if (angRecs && Array.isArray(angRecs)) angRecords = angRecs.filter(r => !deletedKeys.has(recKeyAng(r)));
     gsFullRecordsLoaded = true;
     lastSyncTime = new Date();
     saveStateLocal();
