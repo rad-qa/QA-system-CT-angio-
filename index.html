@@ -512,6 +512,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);bo
 <!-- CT Print Report Page -->
 <div id="ct-page-ctprint" class="page">
   <div class="ph"><div class="ph-icon" style="background:linear-gradient(135deg,#1a6fc4,#4a90d9)"><svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg></div><div><h2>列印報告</h2><p>每日品保 / 每月品保報表列印</p></div></div>
+  <div class="ib ib-amber" style="margin-bottom:10px">
+    <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+    列印前請先同步資料以確保列印的是最新資料
+    <button class="btn btn-t btn-sm" style="margin-left:auto;flex-shrink:0" onclick="manualSyncRecords()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6a6 6 0 11-6 6H4a8 8 0 108-8z"/></svg>同步資料
+    </button>
+  </div>
   <div class="stab-bar">
     <button class="stab active" onclick="showPrintTab('ct-print-daily',this)">列印每日品保</button>
     <button class="stab" onclick="showPrintTab('ct-print-monthly',this)">列印每月品保</button>
@@ -592,6 +599,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);bo
     <div class="fg" style="min-width:185px"><label>檢查室</label><select id="h-room"><option value="">全部</option><option value="R1">二樓急診電腦斷層室</option><option value="R2">影像診療科一樓電腦斷層室</option></select></div>
     <div class="fg"><label>&nbsp;</label><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-p btn-sm" onclick="filterHistory()">查詢</button><button class="btn btn-t btn-sm" onclick="manualSyncRecords()"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6a6 6 0 11-6 6H4a8 8 0 108-8z"/></svg>同步資料</button><button class="btn btn-g btn-sm" onclick="exportExcel()">匯出Excel</button></div></div>
   </div>
+  <div class="ib ib-blue" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>請先點「同步資料」以取得 Google Sheets 最新資料</div>
   <div class="card" style="padding:0;overflow:hidden"><table class="htbl"><thead><tr><th>日期</th><th>類型</th><th>檢查室</th><th>品保人員</th><th>判定結果</th><th>覆核狀態</th><th>操作</th></tr></thead><tbody id="ct-hist-body"></tbody></table></div>
 </div>
 <!-- CT Settings -->
@@ -714,6 +722,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);bo
 <!-- Ang Print Report Page -->
 <div id="ang-page-ang-angprint" class="page">
   <div class="ph"><div class="ph-icon ph-ang"><svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg></div><div><h2>列印報告</h2><p>每日品保報表列印</p></div></div>
+  <div class="ib ib-amber" style="margin-bottom:10px">
+    <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+    列印前請先同步資料以確保列印的是最新資料
+    <button class="btn btn-t btn-sm" style="margin-left:auto;flex-shrink:0" onclick="manualSyncRecords()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6a6 6 0 11-6 6H4a8 8 0 108-8z"/></svg>同步資料
+    </button>
+  </div>
   <div class="card">
     <div class="card-hd"><div class="dot dot-o"></div><h3>每日品保報表設定</h3></div>
     <div class="ttab-bar" style="margin-bottom:14px">
@@ -762,6 +777,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);bo
     <div class="fg"><label>月份</label><input type="month" id="ang-h-month" style="width:148px"></div>
     <div class="fg"><label>&nbsp;</label><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-p btn-sm" onclick="filterAngHistory()">查詢</button><button class="btn btn-t btn-sm" onclick="manualSyncRecords()"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6a6 6 0 11-6 6H4a8 8 0 108-8z"/></svg>同步資料</button><button class="btn btn-g btn-sm" onclick="exportAngExcel()">匯出Excel</button></div></div>
   </div>
+  <div class="ib ib-blue" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>請先點「同步資料」以取得 Google Sheets 最新資料</div>
   <div class="card" style="padding:0;overflow:hidden"><table class="htbl"><thead><tr><th>日期</th><th>品保人員</th><th>判定結果</th><th>覆核狀態</th><th>操作</th></tr></thead><tbody id="ang-hist-body"></tbody></table></div>
 </div>
 <!-- Ang Settings -->
